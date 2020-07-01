@@ -1,14 +1,9 @@
-plugins {
-    id 'java'
-}
 
-group 'com.softeq'
-version '0.0.1-SNAPSHOT'
-
-repositories {
-    mavenCentral()
-}
 
 dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     testCompile group: 'junit', name: 'junit', version: '4.12'
+    implementation 'org.liquibase:liquibase-core'
+    runtimeOnly 'org.postgresql:postgresql'
 }
+

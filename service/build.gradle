@@ -1,14 +1,6 @@
-plugins {
-    id 'java'
-}
-
-group 'com.softeq'
-version '0.0.1-SNAPSHOT'
-
-repositories {
-    mavenCentral()
-}
-
 dependencies {
+    compile project(':crawler')
+    compile project(':repository')
+    implementation 'org.springframework.boot:spring-boot-starter'
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }

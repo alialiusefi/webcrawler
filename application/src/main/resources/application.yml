@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/webcrawler_db
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: admin
+  jpa:
+    show-sql: true
+    generate-ddl: false
+    hibernate:
+      ddl-auto: none
+  liquibase:
+    change-log: classpath:db/liquibase-changeLog.xml
+    enabled: true
+
+
+logging:
+  level:
+    com:
+      epam:
+        notifier:
+          requester:
+            DEBUG
