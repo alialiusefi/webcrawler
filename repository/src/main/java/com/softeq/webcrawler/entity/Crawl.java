@@ -1,7 +1,6 @@
 package com.softeq.webcrawler.entity;
 
 
-import java.time.LocalDateTime;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
@@ -26,6 +25,6 @@ public class Crawl {
 
   private Integer numberOfHits;
 
-  private LocalDateTime crawlTimestamp;
-
+  @ManyToOne
+  private Statistic statistic;
 }

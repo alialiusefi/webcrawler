@@ -4,6 +4,9 @@ import com.softeq.webcrawler.crawler.Crawler;
 import com.softeq.webcrawler.entity.Keyword;
 import com.softeq.webcrawler.entity.Statistic;
 import com.softeq.webcrawler.entity.Url;
+import com.softeq.webcrawler.jobmanager.JobManager;
+import com.softeq.webcrawler.service.CrawlService;
+import com.softeq.webcrawler.service.UrlService;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 public class StatisticJob {
 
+  private final JobManager jobManager;
   private final ExecutorService executorService;
   private List<Keyword> keywords;
   private final Set<String> visitedUrls = ConcurrentHashMap.newKeySet();
@@ -25,12 +29,12 @@ public class StatisticJob {
   @Value("${app.crawler.max-visited-pages:10000}")
   private Integer maxVisitedPages;
   private AtomicInteger totalVisitedPages;
-  //private final CrawlService
-  //private final UrlService
+
   //private final
 
-  public StatisticJob() {
-    executorService = Executors.newFixedThreadPool(threadCount);
+  public StatisticJob(JobManager jobManager) {
+    this.jobManager = jobManager;
+    this.executorService = Executors.newFixedThreadPool(threadCount);
   }
 
   public void start(Statistic statistic, Url seedUrl, List<Keyword> keywords) {
@@ -40,10 +44,11 @@ public class StatisticJob {
   }
 
   public void submitNewUrl(Url url) {
-    Url urlEntity = Url.builder().url(url.getUrl()).build();
-
     if (!visitedUrls.contains(url.getUrl()) && visitedUrls.size() <= maxVisitedPages) {
-      Crawler crawler = new Crawler(urlEntity, keywords, this);
+      // todo: check for link depth
+      url = this.getUrlService().saveUrl(url);
+
+      Crawler crawler = new Crawler(url, keywords, this);
       executorService.execute(crawler);
 
       visitedUrls.add(url.getUrl());
@@ -52,5 +57,17 @@ public class StatisticJob {
 
   public AtomicInteger getTotalVisitedPages() {
     return totalVisitedPages;
+  }
+
+  public Statistic getStatistic() {
+    return statistic;
+  }
+
+  public CrawlService getCrawlService() {
+    return jobManager.getCrawlService();
+  }
+
+  public UrlService getUrlService() {
+    return jobManager.getUrlService();
   }
 }

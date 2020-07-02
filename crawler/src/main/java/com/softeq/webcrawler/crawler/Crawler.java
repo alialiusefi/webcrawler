@@ -3,12 +3,16 @@ package com.softeq.webcrawler.crawler;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.softeq.webcrawler.entity.Crawl;
 import com.softeq.webcrawler.entity.Keyword;
 import com.softeq.webcrawler.entity.Url;
 import com.softeq.webcrawler.job.StatisticJob;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -25,8 +29,6 @@ public class Crawler implements Runnable {
   /*private Parser*/
 
   private final WebClient webclient;
-
-  private Integer currentDepth;
 
   public Crawler(Url url, List<Keyword> keywords, StatisticJob statisticJob) {
     this.url = url;
@@ -45,8 +47,15 @@ public class Crawler implements Runnable {
       List<String> texts = extractTextFromDocument(document);
 
       List<String> urls = extractUrlsFromTexts(texts);
-      urls.forEach(statisticJob::submitNewUrl);
+      urls.forEach(urlStr -> {
+        Url currUrl = Url.builder().url(urlStr).build();
+        statisticJob.submitNewUrl(currUrl);
+      });
 
+      HashMap<Keyword, Integer> hits = searchForKeyWordsInText(texts);
+
+      Set<Entry<Keyword, Integer>> set = hits.entrySet();
+      set.forEach(this::saveCrawlResults);
 
     } catch (IOException e) {
       log.error(e.getMessage(), e);
@@ -54,7 +63,26 @@ public class Crawler implements Runnable {
 
   }
 
-  //private matchElementWithKeyword();
+  private HashMap<Keyword, Integer> searchForKeyWordsInText(List<String> texts) {
+    HashMap<Keyword, Integer> hits = new HashMap<>();
+
+    keywords.forEach(keyword -> hits.put(keyword, 0));
+
+    texts.forEach(text -> {
+      String lowerCaseText = text.toLowerCase();
+      String withoutPunctuation = lowerCaseText.replaceAll("\\p{Punct}", "");
+
+      keywords.forEach(
+          keyword -> {
+            if (keyword.getKeyword().equals(withoutPunctuation)) {
+              hits.replace(keyword, hits.get(keyword) + 1);
+            }
+          }
+      );
+    });
+
+    return hits;
+  }
 
   private List<String> extractTextFromDocument(Document document) {
     List<String> textsExtracted = new ArrayList<>();
@@ -72,8 +100,15 @@ public class Crawler implements Runnable {
     return textsExtracted;
   }
 
-  private void submitCrawlToStatisticJob(Keyword keyword, Url url, Integer amountOfHits) {
+  private void saveCrawlResults(Entry<Keyword, Integer> entry) {
+    Crawl crawl = Crawl.builder()
+        .url(url)
+        .keyword(entry.getKey())
+        .numberOfHits(entry.getValue())
+        .statistic(statisticJob.getStatistic())
+        .build();
 
+    this.statisticJob.getCrawlService().saveCrawl(crawl);
   }
 
   private List<String> extractUrlsFromTexts(List<String> texts) {
