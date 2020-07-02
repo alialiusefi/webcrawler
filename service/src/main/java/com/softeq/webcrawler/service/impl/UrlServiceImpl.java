@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UrlServiceImpl implements UrlService {
 
-  public UrlRepository urlRepository;
+  public final UrlRepository urlRepository;
 
   @Override
   public Url saveUrl(Url url) {

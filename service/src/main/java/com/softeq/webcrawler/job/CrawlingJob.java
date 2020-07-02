@@ -1,10 +1,11 @@
 package com.softeq.webcrawler.job;
 
+import com.softeq.webcrawler.config.CrawlingJobConfig;
 import com.softeq.webcrawler.crawler.Crawler;
 import com.softeq.webcrawler.entity.Keyword;
 import com.softeq.webcrawler.entity.Statistic;
 import com.softeq.webcrawler.entity.Url;
-import com.softeq.webcrawler.jobmanager.JobManager;
+import com.softeq.webcrawler.manager.JobManager;
 import com.softeq.webcrawler.service.CrawlService;
 import com.softeq.webcrawler.service.UrlService;
 import java.util.List;
@@ -13,28 +14,23 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.springframework.beans.factory.annotation.Value;
 
-public class StatisticJob {
+public class CrawlingJob {
 
   private final JobManager jobManager;
   private final ExecutorService executorService;
-  private List<Keyword> keywords;
   private final Set<String> visitedUrls = ConcurrentHashMap.newKeySet();
+  private List<Keyword> keywords;
   private Statistic statistic;
-  @Value("${app.crawler.thread-count:5}")
-  private Integer threadCount;
-  @Value("${app.crawler.link-depth:8}")
-  private Integer linkDepth;
-  @Value("${app.crawler.max-visited-pages:10000}")
-  private Integer maxVisitedPages;
-  private AtomicInteger totalVisitedPages;
+  private CrawlingJobConfig crawlingJobConfig;
+  private final AtomicInteger totalVisitedPages = new AtomicInteger(0);
 
   //private final
 
-  public StatisticJob(JobManager jobManager) {
+  public CrawlingJob(JobManager jobManager) {
     this.jobManager = jobManager;
-    this.executorService = Executors.newFixedThreadPool(threadCount);
+    this.crawlingJobConfig = jobManager.getCrawlingJobConfig();
+    this.executorService = Executors.newFixedThreadPool(crawlingJobConfig.getThreadCount());
   }
 
   public void start(Statistic statistic, Url seedUrl, List<Keyword> keywords) {
@@ -44,8 +40,8 @@ public class StatisticJob {
   }
 
   public void submitNewUrl(Url url) {
-    if (!visitedUrls.contains(url.getUrl()) && visitedUrls.size() <= maxVisitedPages) {
-      // todo: check for link depth
+    if (!visitedUrls.contains(url.getUrl()) && visitedUrls.size() <= crawlingJobConfig.getMaxVisitedPages()) {
+      // todo: check for link depth and visit limit
       url = this.getUrlService().saveUrl(url);
 
       Crawler crawler = new Crawler(url, keywords, this);

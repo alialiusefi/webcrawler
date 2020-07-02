@@ -13,11 +13,16 @@ spring:
     change-log: classpath:db/liquibase-changeLog.xml
     enabled: true
 
+app:
+  crawler:
+    thread-count: 6
+    link-depth: 9
+    max-visited-pages: 10001
 
 logging:
   level:
     com:
-      epam:
-        notifier:
-          requester:
+      softeq:
+        webcrawler:
+          service:
             DEBUG

@@ -1,5 +1,0 @@
-app:
-  crawler:
-    thread-count: 5
-    link-depth: 8
-    max-visited-pages: 10000

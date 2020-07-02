@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class KeywordServiceImpl implements KeywordService {
 
-  private KeywordRepository keywordRepository;
+  private final KeywordRepository keywordRepository;
 
   @Override
   public Keyword saveKeyword(Keyword keyword) {

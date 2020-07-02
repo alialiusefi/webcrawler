@@ -1,13 +1,15 @@
-package com.softeq.webcrawler.jobmanager;
+package com.softeq.webcrawler.manager;
 
+import com.softeq.webcrawler.config.CrawlingJobConfig;
 import com.softeq.webcrawler.entity.Keyword;
 import com.softeq.webcrawler.entity.Statistic;
 import com.softeq.webcrawler.entity.Url;
-import com.softeq.webcrawler.job.StatisticJob;
+import com.softeq.webcrawler.job.CrawlingJob;
 import com.softeq.webcrawler.service.CrawlService;
 import com.softeq.webcrawler.service.KeywordService;
 import com.softeq.webcrawler.service.UrlService;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -18,10 +20,13 @@ public class JobManager {
   private final KeywordService keywordService;
   private final UrlService urlService;
   private final CrawlService crawlService;
+  private final CrawlingJobConfig crawlingJobConfig;
 
-  public void submitStatisticJob(Statistic statistic, Url seedUrl, List<Keyword> keywords) {
-    StatisticJob statisticJob = new StatisticJob(this);
-    statisticJob.start(statistic, seedUrl, keywords);
+  public void submitCrawlingJob(Statistic statistic, Url seedUrl, List<Keyword> keywords) {
+    CompletableFuture.runAsync(() -> {
+      CrawlingJob crawlingJob = new CrawlingJob(this);
+      crawlingJob.start(statistic, seedUrl, keywords);
+    }).join();
   }
 
   public CrawlService getCrawlService() {
@@ -34,5 +39,9 @@ public class JobManager {
 
   public KeywordService getKeywordService() {
     return keywordService;
+  }
+
+  public CrawlingJobConfig getCrawlingJobConfig() {
+    return crawlingJobConfig;
   }
 }

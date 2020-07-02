@@ -6,34 +6,32 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.softeq.webcrawler.entity.Crawl;
 import com.softeq.webcrawler.entity.Keyword;
 import com.softeq.webcrawler.entity.Url;
-import com.softeq.webcrawler.job.StatisticJob;
+import com.softeq.webcrawler.job.CrawlingJob;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
-import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
-@Builder
 @Slf4j
 public class Crawler implements Runnable {
 
   private final Url url;
   private final List<Keyword> keywords;
-  private final StatisticJob statisticJob;
+  private final CrawlingJob crawlingJob;
   /*private Parser*/
 
   private final WebClient webclient;
 
-  public Crawler(Url url, List<Keyword> keywords, StatisticJob statisticJob) {
+  public Crawler(Url url, List<Keyword> keywords, CrawlingJob crawlingJob) {
     this.url = url;
     this.keywords = keywords;
-    this.statisticJob = statisticJob;
+    this.crawlingJob = crawlingJob;
     this.webclient = new WebClient(BrowserVersion.BEST_SUPPORTED);
   }
 
@@ -41,15 +39,16 @@ public class Crawler implements Runnable {
   public void run() {
     try {
       HtmlPage page = webclient.getPage(url.getUrl());
+      crawlingJob.getTotalVisitedPages().incrementAndGet();
 
       Document document = Jsoup.parse(page.asXml());
 
       List<String> texts = extractTextFromDocument(document);
 
-      List<String> urls = extractUrlsFromTexts(texts);
+      List<String> urls = removeUrlsFromTexts(texts);
       urls.forEach(urlStr -> {
         Url currUrl = Url.builder().url(urlStr).build();
-        statisticJob.submitNewUrl(currUrl);
+        crawlingJob.submitNewUrl(currUrl);
       });
 
       HashMap<Keyword, Integer> hits = searchForKeyWordsInText(texts);
@@ -92,6 +91,7 @@ public class Crawler implements Runnable {
         element -> {
           if (element.hasText()) {
             String text = element.text();
+            log.debug(text);
             textsExtracted.add(text);
           }
         }
@@ -105,13 +105,13 @@ public class Crawler implements Runnable {
         .url(url)
         .keyword(entry.getKey())
         .numberOfHits(entry.getValue())
-        .statistic(statisticJob.getStatistic())
+        .statistic(crawlingJob.getStatistic())
         .build();
 
-    this.statisticJob.getCrawlService().saveCrawl(crawl);
+    this.crawlingJob.getCrawlService().saveCrawl(crawl);
   }
 
-  private List<String> extractUrlsFromTexts(List<String> texts) {
+  private List<String> removeUrlsFromTexts(List<String> texts) {
     // check if texts has url, remove if found
     throw new RuntimeException("a");
   }

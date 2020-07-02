@@ -3,7 +3,5 @@ include 'application'
 include 'repository'
 include 'parser'
 include 'service'
-include 'parser'
 include 'repository'
-include 'crawler'
 

@@ -1,6 +1,8 @@
 dependencies {
-    compile project(':crawler')
     compile project(':repository')
+    compile project(':parser')
     implementation 'org.springframework.boot:spring-boot-starter'
+    compile group: 'net.sourceforge.htmlunit', name: 'htmlunit', version: '2.41.0'
+    compile 'org.jsoup:jsoup:1.13.1'
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }

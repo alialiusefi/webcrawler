@@ -6,5 +6,4 @@ public interface CrawlService {
 
   Crawl saveCrawl(Crawl crawl);
 
-
 }

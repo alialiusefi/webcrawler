@@ -30,7 +30,7 @@ create table crawl
 create table statistic
 (
     id         serial,
-    total_hits timestamp default 0,
+    total_hits integer default 0,
     constraint STATISTIC_PK PRIMARY KEY (id)
 );
 
