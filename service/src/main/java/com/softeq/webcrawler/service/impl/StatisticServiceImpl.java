@@ -14,7 +14,7 @@ public class StatisticServiceImpl implements StatisticService {
 
 
   public Statistic saveStatistic(Statistic statistic) {
-    return null;
+    return statisticRepository.save(statistic);
   }
 
 }
