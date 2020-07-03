@@ -9,6 +9,7 @@ import com.softeq.webcrawler.entity.Url;
 import com.softeq.webcrawler.job.CrawlingJob;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -16,16 +17,19 @@ import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 @Slf4j
 public class Crawler implements Runnable {
 
+  private static final String PUNCTUATION_REGEX = "\\p{Punct}";
+  private static final String URL_REGEX = "^(https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
+  private static final String DIRECTORY_REGEX = "^(.+)\\/([^/]+)$";
   private final Url url;
   private final List<Keyword> keywords;
   private final CrawlingJob crawlingJob;
   /*private Parser*/
-
   private final WebClient webclient;
 
   public Crawler(Url url, List<Keyword> keywords, CrawlingJob crawlingJob) {
@@ -45,7 +49,9 @@ public class Crawler implements Runnable {
 
       List<String> texts = extractTextFromDocument(document);
 
-      List<String> urls = removeUrlsFromTexts(texts);
+      List<String> urls = getUrlsFromDocuments(document);
+      log.debug("List of urls: {}", urls);
+
       urls.forEach(urlStr -> {
         Url currUrl = Url.builder().url(urlStr).build();
         crawlingJob.submitNewUrl(currUrl);
@@ -69,7 +75,7 @@ public class Crawler implements Runnable {
 
     texts.forEach(text -> {
       String lowerCaseText = text.toLowerCase();
-      String withoutPunctuation = lowerCaseText.replaceAll("\\p{Punct}", "");
+      String withoutPunctuation = lowerCaseText.replaceAll(PUNCTUATION_REGEX, "");
 
       keywords.forEach(
           keyword -> {
@@ -87,16 +93,13 @@ public class Crawler implements Runnable {
     List<String> textsExtracted = new ArrayList<>();
 
     Elements elements = document.getAllElements();
-    elements.forEach(
-        element -> {
-          if (element.hasText()) {
-            String text = element.text();
-            log.debug(text);
-            textsExtracted.add(text);
-          }
-        }
-    );
-
+    Element rootElement = elements.get(0);
+    String text;
+    if (rootElement.hasText()) {
+      text = rootElement.text();
+      String[] tokens = text.split(" ");
+      textsExtracted.addAll(Arrays.asList(tokens));
+    }
     return textsExtracted;
   }
 
@@ -111,8 +114,23 @@ public class Crawler implements Runnable {
     this.crawlingJob.getCrawlService().saveCrawl(crawl);
   }
 
-  private List<String> removeUrlsFromTexts(List<String> texts) {
-    // check if texts has url, remove if found
-    throw new RuntimeException("a");
+  private List<String> getUrlsFromDocuments(Document document) {
+    List<String> listOfUrls = new ArrayList<>();
+    Elements elements = document.getAllElements();
+    elements.forEach(element -> {
+      if (element.hasAttr("href")) {
+        String urlHref = element.attr("href");
+        if (urlHref.matches(URL_REGEX)) {
+          listOfUrls.add(urlHref);
+        }
+        if (urlHref.matches(DIRECTORY_REGEX)) {
+          String correctUrl = this.url + urlHref;
+          if (correctUrl.matches(URL_REGEX)) {
+            listOfUrls.add(urlHref);
+          }
+        }
+      }
+    });
+    return listOfUrls;
   }
 }

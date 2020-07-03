@@ -14,16 +14,18 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CrawlingJob {
 
   private final JobManager jobManager;
   private final ExecutorService executorService;
   private final Set<String> visitedUrls = ConcurrentHashMap.newKeySet();
+  private final AtomicInteger totalVisitedPages = new AtomicInteger(0);
   private List<Keyword> keywords;
   private Statistic statistic;
   private CrawlingJobConfig crawlingJobConfig;
-  private final AtomicInteger totalVisitedPages = new AtomicInteger(0);
 
   //private final
 
@@ -40,8 +42,10 @@ public class CrawlingJob {
   }
 
   public void submitNewUrl(Url url) {
-    if (!visitedUrls.contains(url.getUrl()) && visitedUrls.size() <= crawlingJobConfig.getMaxVisitedPages()) {
-      // todo: check for link depth and visit limit
+    if (!visitedUrls.contains(url.getUrl())
+        && visitedUrls.size() <= crawlingJobConfig.getMaxVisitedPages()
+        && totalVisitedPages.get() <= crawlingJobConfig.getMaxVisitedPages()
+        && getUrlDepth(url.getUrl()) <= crawlingJobConfig.getLinkDepth()) {
       url = this.getUrlService().saveUrl(url);
 
       Crawler crawler = new Crawler(url, keywords, this);
@@ -49,6 +53,12 @@ public class CrawlingJob {
 
       visitedUrls.add(url.getUrl());
     }
+  }
+
+  private Integer getUrlDepth(String url) {
+    Pattern pattern = Pattern.compile("/\\/.+?/g");
+    Matcher matcher = pattern.matcher(url);
+    return ((Long) matcher.results().count()).intValue();
   }
 
   public AtomicInteger getTotalVisitedPages() {

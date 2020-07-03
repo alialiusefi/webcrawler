@@ -16,17 +16,6 @@ create table keyword
     constraint KEYWORDS_PK PRIMARY KEY (id)
 );
 
-create table crawl
-(
-    id             serial,
-    url_id         bigint  not null,
-    keywords_id    bigint  not null,
-    number_of_hits integer not null,
-    constraint CRAWL_PK PRIMARY KEY (id),
-    constraint KEYWORD_ID_FK foreign key (keywords_id) references keyword,
-    constraint URL_ID_FK foreign key (url_id) references url
-);
-
 create table statistic
 (
     id         serial,
@@ -34,8 +23,24 @@ create table statistic
     constraint STATISTIC_PK PRIMARY KEY (id)
 );
 
-create table crawl_statistic
+
+create table crawl
+(
+    id             serial,
+    url_id         bigint  not null,
+    keyword_id    bigint  not null,
+    number_of_hits integer not null,
+    statistic_id bigint not null,
+    constraint STATISTIC_ID_FK foreign key (statistic_id) references statistic,
+    constraint CRAWL_PK PRIMARY KEY (id),
+    constraint KEYWORD_ID_FK foreign key (keyword_id) references keyword,
+    constraint URL_ID_FK foreign key (url_id) references url
+);
+
+
+/*create table crawl_statistic
 (
     crawl_id     bigint not null,
-    statistic_id bigint not null
-)
+
+    constraint CRAWL_ID_FK foreign key (crawl_id) references crawl
+)*/

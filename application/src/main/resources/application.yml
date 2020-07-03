@@ -24,5 +24,4 @@ logging:
     com:
       softeq:
         webcrawler:
-          service:
-            DEBUG
+          DEBUG
