@@ -42,7 +42,7 @@ public class Crawler implements Runnable {
   @Override
   public void run() {
     try {
-      HtmlPage page = webclient.getPage(url.getUrl());
+      HtmlPage page = webclient.getPage(url.getName());
       crawlingJob.getTotalVisitedPages().incrementAndGet();
 
       Document document = Jsoup.parse(page.asXml());
@@ -50,10 +50,9 @@ public class Crawler implements Runnable {
       List<String> texts = extractTextFromDocument(document);
 
       List<String> urls = getUrlsFromDocuments(document);
-      log.debug("List of urls: {}", urls);
 
       urls.forEach(urlStr -> {
-        Url currUrl = Url.builder().url(urlStr).build();
+        Url currUrl = Url.builder().name(urlStr).build();
         crawlingJob.submitNewUrl(currUrl);
       });
 
@@ -79,7 +78,7 @@ public class Crawler implements Runnable {
 
       keywords.forEach(
           keyword -> {
-            if (keyword.getKeyword().equals(withoutPunctuation)) {
+            if (keyword.getName().equals(withoutPunctuation)) {
               hits.replace(keyword, hits.get(keyword) + 1);
             }
           }
@@ -88,7 +87,7 @@ public class Crawler implements Runnable {
 
     return hits;
   }
-
+  // TODO: mapreduce here!
   private List<String> extractTextFromDocument(Document document) {
     List<String> textsExtracted = new ArrayList<>();
 

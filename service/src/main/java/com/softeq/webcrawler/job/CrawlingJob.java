@@ -42,16 +42,15 @@ public class CrawlingJob {
   }
 
   public void submitNewUrl(Url url) {
-    if (!visitedUrls.contains(url.getUrl())
+    if (!visitedUrls.contains(url.getName())
         && visitedUrls.size() <= crawlingJobConfig.getMaxVisitedPages()
         && totalVisitedPages.get() <= crawlingJobConfig.getMaxVisitedPages()
-        && getUrlDepth(url.getUrl()) <= crawlingJobConfig.getLinkDepth()) {
+        && getUrlDepth(url.getName()) <= crawlingJobConfig.getLinkDepth()) {
       url = this.getUrlService().saveUrl(url);
 
       Crawler crawler = new Crawler(url, keywords, this);
       executorService.execute(crawler);
-
-      visitedUrls.add(url.getUrl());
+      visitedUrls.add(url.getName());
     }
   }
 

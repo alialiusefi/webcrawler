@@ -22,9 +22,7 @@ public class Statistic {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  private Integer totalHits;
-
-  @OneToMany
+  @OneToMany(mappedBy = "statistic")
   private List<Crawl> crawlList;
 
 }

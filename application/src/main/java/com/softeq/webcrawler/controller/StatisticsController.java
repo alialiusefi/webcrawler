@@ -1,6 +1,7 @@
 package com.softeq.webcrawler.controller;
 
 import com.softeq.webcrawler.service.StatisticService;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ContentDisposition;
@@ -22,8 +23,8 @@ public class StatisticsController {
   private final StatisticService statisticService;
 
   @GetMapping("/{statisticId}")
-  public ResponseEntity getStatistics(@PathVariable Long statisticId) {
-    throw new RuntimeException("q");
+  public ResponseEntity<byte[]> getStatistics(@PathVariable Long statisticId) throws IOException {
+    return createResponse(statisticService.getCSVStatistics(statisticId).readAllBytes());
   }
 
   @GetMapping("/{statisticId}/search/top-hits")

@@ -10,4 +10,6 @@ public interface StatisticService {
   InputStream getCSVStatistics(Long statisticId);
 
   InputStream getCSVTopHitsStatistics(Long statisticId, Integer recordCount);
+
+  Statistic getStatisticById(Long statisticId);
 }

@@ -16,8 +16,9 @@ spring:
 app:
   crawler:
     thread-count: 6
-    link-depth: 9
-    max-visited-pages: 10001
+    link-depth: 2
+    #max-visited-pages: 10001
+    max-visited-pages: 100
 
 logging:
   level:

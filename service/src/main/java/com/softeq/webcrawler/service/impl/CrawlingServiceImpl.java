@@ -26,12 +26,12 @@ public class CrawlingServiceImpl implements CrawlingService {
   public Statistic submitNewCrawlingJob(String seedUrl, List<String> keywords) {
     List<Keyword> keywordEntityList = new ArrayList<>();
     keywords.forEach(keywordStr -> {
-      Keyword keywordEntity = Keyword.builder().keyword(keywordStr).build();
+      Keyword keywordEntity = Keyword.builder().name(keywordStr).build();
       keywordEntity = keywordService.saveKeyword(keywordEntity);
       keywordEntityList.add(keywordEntity);
     });
 
-    Url url = Url.builder().url(seedUrl).build();
+    Url url = Url.builder().name(seedUrl).build();
     url = urlService.saveUrl(url);
 
     Statistic statistic = Statistic.builder().build();
