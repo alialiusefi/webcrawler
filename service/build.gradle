@@ -1,6 +1,7 @@
 dependencies {
     compile project(':repository')
     implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
     compile group: 'net.sourceforge.htmlunit', name: 'htmlunit', version: '2.41.0'
     compile 'org.jsoup:jsoup:1.13.1'
     compile 'com.google.guava:guava:29.0-jre'
