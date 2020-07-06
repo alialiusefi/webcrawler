@@ -14,11 +14,10 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class CrawlingJob {
 
+  private static final String DOUBLE_SLASH = "//";
   private final JobManager jobManager;
   private final ExecutorService executorService;
   private final Set<String> visitedUrls = ConcurrentHashMap.newKeySet();
@@ -57,9 +56,15 @@ public class CrawlingJob {
   }
 
   private Integer getUrlDepth(String url) {
-    Pattern pattern = Pattern.compile("/\\/.+?/g");
-    Matcher matcher = pattern.matcher(url);
-    return ((Long) matcher.results().count()).intValue();
+    int httpsIdx = url.indexOf(DOUBLE_SLASH);
+    String trimmedUrl;
+    if (httpsIdx != -1) {
+      trimmedUrl = url.substring(httpsIdx + DOUBLE_SLASH.length());
+    } else {
+      trimmedUrl = url;
+    }
+    String[] tokens = trimmedUrl.split("/");
+    return tokens.length - 1;
   }
 
   public boolean isDone() {
