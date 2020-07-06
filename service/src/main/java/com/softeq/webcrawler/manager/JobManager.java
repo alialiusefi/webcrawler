@@ -6,7 +6,6 @@ import com.softeq.webcrawler.entity.Statistic;
 import com.softeq.webcrawler.entity.Url;
 import com.softeq.webcrawler.job.CrawlingJob;
 import com.softeq.webcrawler.service.CrawlService;
-import com.softeq.webcrawler.service.KeywordService;
 import com.softeq.webcrawler.service.UrlService;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class JobManager {
 
-  private final KeywordService keywordService;
   private final UrlService urlService;
   private final CrawlService crawlService;
   private final CrawlingJobConfig crawlingJobConfig;
@@ -35,10 +33,6 @@ public class JobManager {
 
   public UrlService getUrlService() {
     return urlService;
-  }
-
-  public KeywordService getKeywordService() {
-    return keywordService;
   }
 
   public CrawlingJobConfig getCrawlingJobConfig() {

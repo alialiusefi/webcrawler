@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/statistics")
 public class StatisticsController {
 
+  private static final String FILENAME = "csv-stats.csv";
   private final StatisticService statisticService;
 
   @GetMapping("/{statisticId}")
@@ -34,7 +35,7 @@ public class StatisticsController {
 
   private ResponseEntity<byte[]> createResponse(byte[] file) {
     HttpHeaders headers = new HttpHeaders();
-    headers.setContentDisposition(ContentDisposition.builder("attachment; filename=" + "csv-stats.csv").build());
+    headers.setContentDisposition(ContentDisposition.builder("attachment; filename=" + FILENAME).build());
     headers.setCacheControl(CacheControl.noCache().getHeaderValue());
     return new ResponseEntity<>(file, headers, HttpStatus.OK);
   }

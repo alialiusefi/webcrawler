@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://gateway.docker.internal:5432/webcrawler_db
+    url: jdbc:postgresql://database:5432/webcrawler_db
     driver-class-name: org.postgresql.Driver
     username: postgres
     password: admin
@@ -17,7 +17,6 @@ app:
   crawler:
     thread-count: 6
     link-depth: 2
-    #max-visited-pages: 10001
     max-visited-pages: 100
 
 logging:

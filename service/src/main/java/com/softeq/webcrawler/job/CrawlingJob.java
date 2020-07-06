@@ -27,8 +27,6 @@ public class CrawlingJob {
   private Statistic statistic;
   private CrawlingJobConfig crawlingJobConfig;
 
-  //private final
-
   public CrawlingJob(JobManager jobManager) {
     this.jobManager = jobManager;
     this.crawlingJobConfig = jobManager.getCrawlingJobConfig();

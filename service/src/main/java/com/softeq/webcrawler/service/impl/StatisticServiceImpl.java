@@ -36,7 +36,6 @@ public class StatisticServiceImpl implements StatisticService {
     return createCSVFile(statisticId);
   }
 
-  //todo: builder here for csv!
   @Override
   public InputStream getCSVTopHitsStatistics(Long statisticId, Integer recordCount) {
     List<CrawlView> topCrawls = crawlService.getTopCrawlsByStatisticIdSortByTotalHitsDesc(statisticId, recordCount);
@@ -46,11 +45,6 @@ public class StatisticServiceImpl implements StatisticService {
     String csvFile = header + records;
 
     return new ByteArrayInputStream(csvFile.getBytes(CHARSET));
-  }
-
-  @Override
-  public Statistic getStatisticById(Long statisticId) {
-    return statisticRepository.getOne(statisticId);
   }
 
   public InputStream createCSVFile(Long statisticId) {
@@ -69,7 +63,7 @@ public class StatisticServiceImpl implements StatisticService {
 
     joiner.add(URL_HEADER);
 
-    List<String> keywords = Arrays.asList(crawlView.getKeywords().split(","));
+    List<String> keywords = Arrays.asList(crawlView.getKeywords().split(COLUMN_DELIMITER));
     keywords.forEach(joiner::add);
 
     joiner.add(TOTALHITS_HEADER);
@@ -95,7 +89,7 @@ public class StatisticServiceImpl implements StatisticService {
 
     joiner.add(view.getUrls());
 
-    List<String> hits = Arrays.asList(view.getHitsPerKeyword().split(","));
+    List<String> hits = Arrays.asList(view.getHitsPerKeyword().split(COLUMN_DELIMITER));
     hits.forEach(joiner::add);
 
     joiner.add(view.getTotalHits().toString());

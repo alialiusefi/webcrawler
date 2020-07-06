@@ -1,6 +1,5 @@
 dependencies {
     compile project(':repository')
-    compile project(':parser')
     implementation 'org.springframework.boot:spring-boot-starter'
     compile group: 'net.sourceforge.htmlunit', name: 'htmlunit', version: '2.41.0'
     compile 'org.jsoup:jsoup:1.13.1'

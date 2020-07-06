@@ -1,7 +1,6 @@
 rootProject.name = 'webcrawler'
 include 'application'
 include 'repository'
-include 'parser'
 include 'service'
 include 'repository'
 

@@ -29,7 +29,6 @@ public class Crawler implements Runnable {
   private final Url url;
   private final List<Keyword> keywords;
   private final CrawlingJob crawlingJob;
-  /*private Parser*/
   private final WebClient webclient;
 
   public Crawler(Url url, List<Keyword> keywords, CrawlingJob crawlingJob) {
@@ -87,7 +86,7 @@ public class Crawler implements Runnable {
 
     return hits;
   }
-  // TODO: mapreduce here!
+
   private List<String> extractTextFromDocument(Document document) {
     List<String> textsExtracted = new ArrayList<>();
 

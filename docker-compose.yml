@@ -12,12 +12,12 @@ services:
       - "8080:8080"
     restart: always
     depends_on:
-      - db
+      - database
     networks:
       - app-net
 
-  db:
-    container_name: db
+  database:
+    container_name: database
     restart: always
     image: postgres:latest
     ports:

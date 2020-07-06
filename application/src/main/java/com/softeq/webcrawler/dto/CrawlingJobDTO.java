@@ -13,10 +13,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CrawlingJobDTO {
 
-  //@NotEmpty
+  @NotEmpty
   private List<String> keywords;
 
-  //@NotEmpty
+  @NotEmpty
   private String seedUrl;
 
 }
