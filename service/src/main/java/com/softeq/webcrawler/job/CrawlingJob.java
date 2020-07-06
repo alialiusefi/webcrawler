@@ -7,14 +7,18 @@ import com.softeq.webcrawler.entity.Url;
 import com.softeq.webcrawler.manager.JobManager;
 import com.softeq.webcrawler.service.CrawlService;
 import com.softeq.webcrawler.service.UrlService;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class CrawlingJob {
 
   private static final String DOUBLE_SLASH = "//";
@@ -24,7 +28,6 @@ public class CrawlingJob {
   private final AtomicInteger totalVisitedPages = new AtomicInteger(0);
   private final Integer maxVisitedPages;
   private final Integer linkDepth;
-  private final ConcurrentLinkedDeque<Crawler> crawlersTasks = new ConcurrentLinkedDeque<>();
   private List<Keyword> keywords;
   private Statistic statistic;
 
@@ -42,16 +45,41 @@ public class CrawlingJob {
   }
 
   public void submitNewUrl(Url url) {
-    if (!visitedUrls.contains(url.getName())
-        && visitedUrls.size() <= maxVisitedPages
-        && totalVisitedPages.get() <= maxVisitedPages
-        && getUrlDepth(url.getName()) <= linkDepth) {
+    printResultAndShutdownIfVisitedPagesLimitHasBeenReached();
+    if (!visitedUrls.contains(url.getName()) && visitedUrls.size() <= maxVisitedPages
+        && totalVisitedPages.get() <= maxVisitedPages && getUrlDepth(url.getName()) <= linkDepth) {
       url = this.getUrlService().saveUrl(url);
 
       Crawler crawler = new Crawler(url, keywords, this);
-      crawlersTasks.add(crawler);
       executorService.execute(crawler);
       visitedUrls.add(url.getName());
+    }
+  }
+
+  private void printResultAndShutdownIfVisitedPagesLimitHasBeenReached() {
+    if (totalVisitedPages.get() >= maxVisitedPages) {
+
+      InputStream stream = jobManager.getStatisticService().getCSVTopHitsStatistics(statistic.getId(), 10);
+      try {
+        byte[] bytes = stream.readAllBytes();
+
+        String results = new String(bytes);
+
+        log.info(results);
+
+        terminateExecutorService();
+      } catch (IOException e) {
+        log.error(e.getMessage(), e);
+      }
+    }
+  }
+
+  private void terminateExecutorService() {
+    try {
+      executorService.awaitTermination(5, TimeUnit.MINUTES);
+    } catch (InterruptedException e) {
+      log.error(e.getMessage(), e);
+      executorService.shutdownNow();
     }
   }
 
@@ -65,16 +93,6 @@ public class CrawlingJob {
     }
     String[] tokens = trimmedUrl.split("/");
     return tokens.length - 1;
-  }
-
-  public boolean isDone() {
-    for (Crawler i :
-        crawlersTasks) {
-      if (!i.isDone()) {
-        return false;
-      }
-    }
-    return true;
   }
 
   public AtomicInteger getTotalVisitedPages() {

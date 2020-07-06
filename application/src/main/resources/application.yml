@@ -16,9 +16,9 @@ spring:
     change-log: classpath:db/liquibase-changeLog.xml
 app:
   crawler:
-    thread-count: 6
-    link-depth: 2
-    max-visited-pages: 100
+    thread-count: 5
+    default-link-depth: 8
+    default-max-visited-pages: 10000
 
 logging:
   level:
@@ -26,3 +26,6 @@ logging:
       softeq:
         webcrawler:
           DEBUG
+      gargoylesoftware:
+        htmlunit:
+          OFF

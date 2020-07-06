@@ -7,7 +7,6 @@ import com.softeq.webcrawler.entity.Crawl;
 import com.softeq.webcrawler.entity.Keyword;
 import com.softeq.webcrawler.entity.Url;
 import com.softeq.webcrawler.job.CrawlingJob;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -43,8 +42,8 @@ public class Crawler implements Runnable {
   @Override
   public void run() {
     try {
-      HtmlPage page = webclient.getPage(url.getName());
       crawlingJob.getTotalVisitedPages().incrementAndGet();
+      HtmlPage page = webclient.getPage(url.getName());
 
       Document document = Jsoup.parse(page.asXml());
 
@@ -62,7 +61,7 @@ public class Crawler implements Runnable {
       Set<Entry<Keyword, Integer>> set = hits.entrySet();
       set.forEach(this::saveCrawlResults);
       isDone = true;
-    } catch (IOException e) {
+    } catch (Exception e) {
       log.error(e.getMessage(), e);
     } finally {
       isDone = true;
