@@ -29,14 +29,12 @@ public class Crawler implements Runnable {
   private final List<Keyword> keywords;
   private final CrawlingJob crawlingJob;
   private final WebClient webclient;
-  private boolean isDone;
 
   public Crawler(Url url, List<Keyword> keywords, CrawlingJob crawlingJob) {
     this.url = url;
     this.keywords = keywords;
     this.crawlingJob = crawlingJob;
     this.webclient = new WebClient(BrowserVersion.BEST_SUPPORTED);
-    this.isDone = false;
   }
 
   @Override
@@ -60,11 +58,8 @@ public class Crawler implements Runnable {
 
       Set<Entry<Keyword, Integer>> set = hits.entrySet();
       set.forEach(this::saveCrawlResults);
-      isDone = true;
     } catch (Exception e) {
       log.error(e.getMessage(), e);
-    } finally {
-      isDone = true;
     }
 
   }
@@ -135,7 +130,4 @@ public class Crawler implements Runnable {
     return listOfUrls;
   }
 
-  public boolean isDone() {
-    return isDone;
-  }
 }

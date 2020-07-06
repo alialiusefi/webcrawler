@@ -58,8 +58,8 @@ public class CrawlingJob {
 
   private void printResultAndShutdownIfVisitedPagesLimitHasBeenReached() {
     if (totalVisitedPages.get() >= maxVisitedPages) {
-
       InputStream stream = jobManager.getStatisticService().getCSVTopHitsStatistics(statistic.getId(), 10);
+
       try {
         byte[] bytes = stream.readAllBytes();
 
