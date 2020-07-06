@@ -11,6 +11,7 @@ import com.softeq.webcrawler.service.UrlService;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,9 +24,10 @@ public class CrawlingJob {
   private final ExecutorService executorService;
   private final Set<String> visitedUrls = ConcurrentHashMap.newKeySet();
   private final AtomicInteger totalVisitedPages = new AtomicInteger(0);
+  private final CrawlingJobConfig crawlingJobConfig;
+  private final ConcurrentLinkedDeque<Crawler> crawlersTasks = new ConcurrentLinkedDeque<>();
   private List<Keyword> keywords;
   private Statistic statistic;
-  private CrawlingJobConfig crawlingJobConfig;
 
   public CrawlingJob(JobManager jobManager) {
     this.jobManager = jobManager;
@@ -47,6 +49,7 @@ public class CrawlingJob {
       url = this.getUrlService().saveUrl(url);
 
       Crawler crawler = new Crawler(url, keywords, this);
+      crawlersTasks.add(crawler);
       executorService.execute(crawler);
       visitedUrls.add(url.getName());
     }
@@ -56,6 +59,16 @@ public class CrawlingJob {
     Pattern pattern = Pattern.compile("/\\/.+?/g");
     Matcher matcher = pattern.matcher(url);
     return ((Long) matcher.results().count()).intValue();
+  }
+
+  public boolean isDone() {
+    for (Crawler i :
+        crawlersTasks) {
+      if (!i.isDone()) {
+        return false;
+      }
+    }
+    return true;
   }
 
   public AtomicInteger getTotalVisitedPages() {
