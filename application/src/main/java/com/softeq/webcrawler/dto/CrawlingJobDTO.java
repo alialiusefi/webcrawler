@@ -19,4 +19,8 @@ public class CrawlingJobDTO {
   @NotEmpty
   private String seedUrl;
 
+  private Integer maxVisitedPages;
+
+  private Integer linkDepth;
+
 }

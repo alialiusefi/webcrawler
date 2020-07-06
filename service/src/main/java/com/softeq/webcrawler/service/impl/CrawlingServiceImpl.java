@@ -10,6 +10,7 @@ import com.softeq.webcrawler.service.StatisticService;
 import com.softeq.webcrawler.service.UrlService;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +24,7 @@ public class CrawlingServiceImpl implements CrawlingService {
   private final JobManager jobManager;
 
   @Override
-  public Statistic submitNewCrawlingJob(String seedUrl, List<String> keywords) {
+  public Statistic submitNewCrawlingJob(String seedUrl, List<String> keywords, Optional<Integer> linkDepth, Optional<Integer> maxVisitedPages) {
     List<Keyword> keywordEntityList = new ArrayList<>();
     keywords.forEach(keywordStr -> {
       Keyword keywordEntity = Keyword.builder().name(keywordStr).build();
@@ -37,7 +38,7 @@ public class CrawlingServiceImpl implements CrawlingService {
     Statistic statistic = Statistic.builder().build();
     statistic = statisticService.saveStatistic(statistic);
 
-    jobManager.submitCrawlingJob(statistic, url, keywordEntityList);
+    jobManager.submitCrawlingJob(statistic, url, keywordEntityList, linkDepth, maxVisitedPages);
 
     return statistic;
   }

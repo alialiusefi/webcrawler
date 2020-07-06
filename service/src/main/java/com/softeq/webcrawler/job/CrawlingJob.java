@@ -1,6 +1,5 @@
 package com.softeq.webcrawler.job;
 
-import com.softeq.webcrawler.config.CrawlingJobConfig;
 import com.softeq.webcrawler.crawler.Crawler;
 import com.softeq.webcrawler.entity.Keyword;
 import com.softeq.webcrawler.entity.Statistic;
@@ -24,15 +23,17 @@ public class CrawlingJob {
   private final ExecutorService executorService;
   private final Set<String> visitedUrls = ConcurrentHashMap.newKeySet();
   private final AtomicInteger totalVisitedPages = new AtomicInteger(0);
-  private final CrawlingJobConfig crawlingJobConfig;
+  private final Integer maxVisitedPages;
+  private final Integer linkDepth;
   private final ConcurrentLinkedDeque<Crawler> crawlersTasks = new ConcurrentLinkedDeque<>();
   private List<Keyword> keywords;
   private Statistic statistic;
 
-  public CrawlingJob(JobManager jobManager) {
+  public CrawlingJob(JobManager jobManager, Integer threadCount, Integer linkDepth, Integer maxVisitedPages) {
     this.jobManager = jobManager;
-    this.crawlingJobConfig = jobManager.getCrawlingJobConfig();
-    this.executorService = Executors.newFixedThreadPool(crawlingJobConfig.getThreadCount());
+    this.linkDepth = linkDepth;
+    this.maxVisitedPages = maxVisitedPages;
+    this.executorService = Executors.newFixedThreadPool(threadCount);
   }
 
   public void start(Statistic statistic, Url seedUrl, List<Keyword> keywords) {
@@ -43,9 +44,9 @@ public class CrawlingJob {
 
   public void submitNewUrl(Url url) {
     if (!visitedUrls.contains(url.getName())
-        && visitedUrls.size() <= crawlingJobConfig.getMaxVisitedPages()
-        && totalVisitedPages.get() <= crawlingJobConfig.getMaxVisitedPages()
-        && getUrlDepth(url.getName()) <= crawlingJobConfig.getLinkDepth()) {
+        && visitedUrls.size() <= maxVisitedPages
+        && totalVisitedPages.get() <= maxVisitedPages
+        && getUrlDepth(url.getName()) <= linkDepth) {
       url = this.getUrlService().saveUrl(url);
 
       Crawler crawler = new Crawler(url, keywords, this);

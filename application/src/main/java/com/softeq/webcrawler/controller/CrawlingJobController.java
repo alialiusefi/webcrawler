@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.util.Optional;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -34,7 +35,9 @@ public class CrawlingJobController {
       @ApiResponse(code = 400, message = "Bad request given")
   })
   public StatisticDTO submitCrawlingJob(@ApiParam("DTO object to pass keywords & seed url") @RequestBody @Valid CrawlingJobDTO crawlingJobDTO) {
-    Statistic statistic = crawlingService.submitNewCrawlingJob(crawlingJobDTO.getSeedUrl(), crawlingJobDTO.getKeywords());
+    Statistic statistic = crawlingService.submitNewCrawlingJob(crawlingJobDTO.getSeedUrl(), crawlingJobDTO.getKeywords(),
+        Optional.of(crawlingJobDTO.getLinkDepth()), Optional.of(crawlingJobDTO.getMaxVisitedPages()));
+
     return StatisticDTO.builder().statisticId(statistic.getId()).build();
   }
 

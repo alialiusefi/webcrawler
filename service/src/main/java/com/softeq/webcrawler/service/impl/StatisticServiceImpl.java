@@ -1,9 +1,11 @@
 package com.softeq.webcrawler.service.impl;
 
+import com.softeq.webcrawler.entity.Keyword;
 import com.softeq.webcrawler.entity.Statistic;
 import com.softeq.webcrawler.exception.ResourceNotFoundException;
 import com.softeq.webcrawler.repository.StatisticRepository;
 import com.softeq.webcrawler.service.CrawlService;
+import com.softeq.webcrawler.service.KeywordService;
 import com.softeq.webcrawler.service.StatisticService;
 import com.softeq.webcrawler.view.CrawlView;
 import java.io.ByteArrayInputStream;
@@ -29,6 +31,7 @@ public class StatisticServiceImpl implements StatisticService {
   private static final String RESOURCE_NOTFOUND = "Cannot find resource with the id: %d";
   private final StatisticRepository statisticRepository;
   private final CrawlService crawlService;
+  private final KeywordService keywordService;
 
   public Statistic saveStatistic(Statistic statistic) {
     return statisticRepository.save(statistic);
@@ -36,25 +39,25 @@ public class StatisticServiceImpl implements StatisticService {
 
   @Override
   public InputStream getCSVStatistics(Long statisticId) {
-    isStatisticExists(statisticId);
+    Statistic statistic = isStatisticExists(statisticId);
 
     List<CrawlView> crawls = crawlService.getCrawlsByStatisticId(statisticId);
 
-    return createCSVFile(statisticId, crawls);
+    return createCSVFile(statistic, crawls);
   }
 
   @Override
   public InputStream getCSVTopHitsStatistics(Long statisticId, Integer recordCount) {
-    isStatisticExists(statisticId);
+    Statistic statistic = isStatisticExists(statisticId);
 
     List<CrawlView> crawls = crawlService.getTopCrawlsByStatisticIdSortByTotalHitsDesc(statisticId, recordCount);
 
-    return createCSVFile(statisticId, crawls);
+    return createCSVFile(statistic, crawls);
   }
 
-  private InputStream createCSVFile(Long statisticId, List<CrawlView> crawls) {
+  private InputStream createCSVFile(Statistic statistic, List<CrawlView> crawls) {
 
-    String header = createHeader(crawls.get(0));
+    String header = createHeader(statistic);
     String records = createRecords(crawls);
 
     String csvFile = header + records;
@@ -62,13 +65,13 @@ public class StatisticServiceImpl implements StatisticService {
     return new ByteArrayInputStream(csvFile.getBytes(CHARSET));
   }
 
-  private String createHeader(CrawlView crawlView) {
+  private String createHeader(Statistic statistic) {
     StringJoiner joiner = new StringJoiner(COLUMN_DELIMITER);
 
     joiner.add(URL_HEADER);
 
-    List<String> keywords = Arrays.asList(crawlView.getKeywords().split(COLUMN_DELIMITER));
-    keywords.forEach(joiner::add);
+    List<Keyword> keywords = keywordService.getAllKeywordsByStatistic(statistic);
+    keywords.forEach(keyword -> joiner.add(keyword.getName()));
 
     joiner.add(TOTALHITS_HEADER);
 
@@ -101,11 +104,12 @@ public class StatisticServiceImpl implements StatisticService {
     return joiner.toString();
   }
 
-  private void isStatisticExists(Long statisticId) {
+  private Statistic isStatisticExists(Long statisticId) {
     Optional<Statistic> statistic = statisticRepository.findById(statisticId);
     if (statistic.isEmpty()) {
       throw new ResourceNotFoundException(String.format(RESOURCE_NOTFOUND, statisticId));
     }
+    return statistic.get();
   }
 
 }
