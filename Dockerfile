@@ -1,8 +1,8 @@
 FROM gradle:6.5.0-jdk11 AS build
-COPY --chown=gradle:gradle . /home/gradle/src
+#COPY --chown=gradle:gradle . /home/gradle/src
 ENV APP_PATH=/home/gradle/src
 WORKDIR $APP_PATH
-RUN gradle bootJar
+#RUN gradle bootJar
 
 FROM openjdk:11-jre-slim
 
