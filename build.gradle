@@ -18,6 +18,9 @@ subprojects {
         maven {
             url = 'https://repo.maven.apache.org/maven2'
         }
+        jcenter {
+            url = 'http://oss.jfrog.org/artifactory/oss-snapshot-local/'
+        }
     }
 
     configurations {
