@@ -2,7 +2,6 @@
 
 version: '3.7'
 
-
 services:
   app-server:
     build:
@@ -10,7 +9,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
-    restart: always
+    #restart: always
     depends_on:
       - database
     networks:
@@ -19,15 +18,29 @@ services:
   database:
     container_name: database
     restart: always
-    image: postgres:latest
+    image: postgres
     ports:
       - "5432:5432"
     environment:
       CONFIGS: "listen_addresses:'*'"
-      POSTGRES_DATABASE: webcrawler_db
+      POSTGRES_DB: webcrawler_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin
-      POSTGRES_ROOT_PASSWORD: admin
+    volumes:
+      - db-data:/var/lib/postgres
+    networks:
+      - app-net
+  database2:
+    container_name: database2
+    restart: always
+    image: postgres:10-alpine
+    ports:
+      - "5433:5432"
+    environment:
+      CONFIGS: "listen_addresses:'*'"
+      POSTGRES_DB: webcrawler_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
     volumes:
       - db-data:/var/lib/postgres
     networks:

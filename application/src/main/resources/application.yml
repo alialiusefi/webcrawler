@@ -1,18 +1,25 @@
 spring:
   datasource:
-    url: jdbc:postgresql://database:5432/webcrawler_db
+    url: jdbc:postgresql://database/webcrawler_db
     driver-class-name: org.postgresql.Driver
+    #url: ${DB_URL}
+    #username: ${DB_USERNAME}
+    #password: ${DB_PASSWORD}
     username: postgres
     password: admin
+    hikari:
+      initialization-fail-timeout: 0
   jpa:
     show-sql: true
     generate-ddl: false
     hibernate:
       ddl-auto: none
   liquibase:
+    enabled: false
     change-log: classpath:db/liquibase-changeLog.xml
-    enabled: true
-
+    url: jdbc:postgresql://database/webcrawler_db
+    user: postgres
+    password: admin
 app:
   crawler:
     thread-count: 6
