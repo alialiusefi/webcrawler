@@ -1,0 +1,40 @@
+# Docker Compose file Reference (https://docs.docker.com/compose/compose-file/)
+
+version: '3.7'
+
+
+services:
+  app-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    restart: always
+    depends_on:
+      - db
+    networks:
+      - app-net
+
+  db:
+    container_name: db
+    restart: always
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      CONFIGS: "listen_addresses:'*'"
+      POSTGRES_DATABASE: webcrawler_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_ROOT_PASSWORD: admin
+    volumes:
+      - db-data:/var/lib/postgres
+    networks:
+      - app-net
+# Volumes
+volumes:
+  db-data:
+
+networks:
+  app-net:

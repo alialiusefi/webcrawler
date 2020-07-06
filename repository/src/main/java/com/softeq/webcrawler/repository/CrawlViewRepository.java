@@ -1,12 +1,9 @@
-package com.softeq.webcrawler.service;
+package com.softeq.webcrawler.repository;
 
-import com.softeq.webcrawler.entity.Crawl;
 import com.softeq.webcrawler.view.CrawlView;
 import java.util.List;
 
-public interface CrawlService {
-
-  Crawl saveCrawl(Crawl crawl);
+public interface CrawlViewRepository {
 
   List<CrawlView> getTopCrawlsByStatisticIdSortByTotalHitsDesc(Long statisticId, Integer limitParam);
 

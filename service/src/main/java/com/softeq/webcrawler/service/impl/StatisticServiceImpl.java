@@ -1,25 +1,18 @@
 package com.softeq.webcrawler.service.impl;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-import com.softeq.webcrawler.entity.Crawl;
-import com.softeq.webcrawler.entity.Keyword;
 import com.softeq.webcrawler.entity.Statistic;
-import com.softeq.webcrawler.entity.Url;
 import com.softeq.webcrawler.repository.StatisticRepository;
-import com.softeq.webcrawler.service.KeywordService;
+import com.softeq.webcrawler.service.CrawlService;
 import com.softeq.webcrawler.service.StatisticService;
+import com.softeq.webcrawler.view.CrawlView;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.StringJoiner;
-import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -32,7 +25,7 @@ public class StatisticServiceImpl implements StatisticService {
   private static final String ROW_DELIMITER = "\n";
   private static final Charset CHARSET = StandardCharsets.UTF_8;
   private final StatisticRepository statisticRepository;
-  private final KeywordService keywordService;
+  private final CrawlService crawlService;
 
   public Statistic saveStatistic(Statistic statistic) {
     return statisticRepository.save(statistic);
@@ -43,9 +36,16 @@ public class StatisticServiceImpl implements StatisticService {
     return createCSVFile(statisticId);
   }
 
+  //todo: builder here for csv!
   @Override
   public InputStream getCSVTopHitsStatistics(Long statisticId, Integer recordCount) {
-    return null;
+    List<CrawlView> topCrawls = crawlService.getTopCrawlsByStatisticIdSortByTotalHitsDesc(statisticId, recordCount);
+    String header = createHeader(topCrawls.get(0));
+    String records = createRecords(topCrawls);
+
+    String csvFile = header + records;
+
+    return new ByteArrayInputStream(csvFile.getBytes(CHARSET));
   }
 
   @Override
@@ -54,24 +54,23 @@ public class StatisticServiceImpl implements StatisticService {
   }
 
   public InputStream createCSVFile(Long statisticId) {
-    Statistic statistic = getStatisticById(statisticId);
 
-    List<Keyword> keywords = keywordService.getAllKeywordsByStatistic(statistic);
-
-    String header = createHeader(keywords);
-    String records = createRecords(statistic.getCrawlList());
+    List<CrawlView> views = crawlService.getCrawlsByStatisticId(statisticId);
+    String header = createHeader(views.get(0));
+    String records = createRecords(views);
 
     String csvFile = header + records;
 
     return new ByteArrayInputStream(csvFile.getBytes(CHARSET));
   }
 
-  private String createHeader(List<Keyword> keywords) {
+  private String createHeader(CrawlView crawlView) {
     StringJoiner joiner = new StringJoiner(COLUMN_DELIMITER);
 
     joiner.add(URL_HEADER);
 
-    keywords.forEach(keyword -> joiner.add(keyword.getName()));
+    List<String> keywords = Arrays.asList(crawlView.getKeywords().split(","));
+    keywords.forEach(joiner::add);
 
     joiner.add(TOTALHITS_HEADER);
 
@@ -80,35 +79,26 @@ public class StatisticServiceImpl implements StatisticService {
     return joiner.toString();
   }
 
-  private String createRecords(List<Crawl> crawls) {
-    Multimap<Url, Pair<Keyword, Integer>> multimap = ArrayListMultimap.create();
-
-    crawls.forEach(crawl -> multimap.put(crawl.getUrl(), Pair.of(crawl.getKeyword(), crawl.getNumberOfHits())));
-
-    Set<Url> urls = multimap.keySet();
-
+  private String createRecords(List<CrawlView> crawls) {
     StringJoiner joiner = new StringJoiner(ROW_DELIMITER);
 
-    urls.forEach(o -> {
-      String record = createRecord(o, multimap.get(o));
+    crawls.forEach(o -> {
+      String record = createRecord(o);
       joiner.add(record);
     });
 
     return joiner.toString();
   }
 
-  private String createRecord(Url url, Collection<Pair<Keyword, Integer>> hits) {
-    AtomicReference<Integer> totalHits = new AtomicReference<>(0);
+  private String createRecord(CrawlView view) {
     StringJoiner joiner = new StringJoiner(COLUMN_DELIMITER);
 
-    joiner.add(url.getName());
+    joiner.add(view.getUrls());
 
-    hits.forEach(o -> {
-      joiner.add(o.getRight().toString());
-      totalHits.updateAndGet(v -> v + o.getRight());
-    });
+    List<String> hits = Arrays.asList(view.getHitsPerKeyword().split(","));
+    hits.forEach(joiner::add);
 
-    joiner.add(totalHits.get().toString());
+    joiner.add(view.getTotalHits().toString());
 
     return joiner.toString();
   }

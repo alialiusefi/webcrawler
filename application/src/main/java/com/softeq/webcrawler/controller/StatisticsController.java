@@ -7,7 +7,6 @@ import org.springframework.http.CacheControl;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,9 +27,9 @@ public class StatisticsController {
   }
 
   @GetMapping("/{statisticId}/search/top-hits")
-  public ResponseEntity getTopStatistics(@PathVariable Long statisticId,
-      @RequestParam(defaultValue = "10") Integer amountOfRecords) {
-    throw new RuntimeException("q");
+  public ResponseEntity<byte[]> getTopStatistics(@PathVariable Long statisticId,
+      @RequestParam(defaultValue = "10") Integer amountOfRecords) throws IOException {
+    return createResponse(statisticService.getCSVTopHitsStatistics(statisticId, amountOfRecords).readAllBytes());
   }
 
   private ResponseEntity<byte[]> createResponse(byte[] file) {

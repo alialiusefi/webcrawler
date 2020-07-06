@@ -1,7 +1,3 @@
-/*create database webcrawler_db;
-
-\connect webcrawler_db;
-*/
 create table url
 (
     id  serial,

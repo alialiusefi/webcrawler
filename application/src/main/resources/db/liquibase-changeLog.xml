@@ -8,4 +8,8 @@
   <changeSet id="1" author="Ali Al-Iusefi">
     <sqlFile path="sql/001_init-schema.sql" relativeToChangelogFile="true" stripComments="true"/>
   </changeSet>
+  <changeSet id="2" author="Ali Al-Iusefi">
+    <sqlFile path="sql/002_create-function.sql" relativeToChangelogFile="true" stripComments="true" splitStatements="false"/>
+  </changeSet>
+
 </databaseChangeLog>
