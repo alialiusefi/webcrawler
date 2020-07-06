@@ -11,5 +11,8 @@ Installation Requirements:
     * Java 11
     * Gradle
     * Docker
+
+To change the following configuration parameters (`thread-count`,`link-depth`,`max-visited-pages`),
+please edit the parameters in `application.yml` file that is located in `application/src/main/resources/application.yml` 
     
 To send requests to the api, visit the swagger documentation endpoint `localhost:8080/swagger-ui.html`
