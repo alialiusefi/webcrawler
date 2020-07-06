@@ -9,7 +9,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
-    #restart: always
+    restart: always
     depends_on:
       - database
     networks:
@@ -30,22 +30,7 @@ services:
       - db-data:/var/lib/postgres
     networks:
       - app-net
-  database2:
-    container_name: database2
-    restart: always
-    image: postgres:10-alpine
-    ports:
-      - "5433:5432"
-    environment:
-      CONFIGS: "listen_addresses:'*'"
-      POSTGRES_DB: webcrawler_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: admin
-    volumes:
-      - db-data:/var/lib/postgres
-    networks:
-      - app-net
-# Volumes
+
 volumes:
   db-data:
 

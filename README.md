@@ -5,6 +5,6 @@ A **WebCrawler** application that parses webpages and searches for keywords, the
 
 To download this app, just clone app this using command:
 `git clone https://github.com/alialiusefi/WebCrawler`
-then, using `docker` just build and run the app using `docker-compose up`
+then, using run the script `run.sh`
 
-To send requests to the api, visit the swagger documentation endpoint `hostname:8080/swagger-ui.html`
+To send requests to the api, visit the swagger documentation endpoint `localhost:8080/swagger-ui.html`
